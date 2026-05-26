@@ -1,0 +1,20 @@
+{
+  "appId": "org.wgralgo.redflaggreenlightinvesting",
+  "appName": "Red Flag or Green Light",
+  "webDir": "www",
+  "android": {
+    "webContentsDebuggingEnabled": false,
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "backgroundColor": "#000000",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false
+    }
+  }
+}

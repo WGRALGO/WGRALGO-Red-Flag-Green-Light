@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+<title>Red Flag or Green Light</title>
+<meta name="theme-color" content="#000000" />
+<style>
+  :root{
+    --gold:#d4af37;
+    --gold-soft:#f5e4b3;
+    --gold-deep:#8a6b1c;
+    --bg:#000;
+    --panel:#0d0d0d;
+    --panel-2:#161616;
+    --line:rgba(212,175,55,0.45);
+    --line-strong:rgba(212,175,55,0.85);
+    --text:#f4f1e6;
+    --muted:#a89e84;
+    --green:#1ea65a;
+    --green-soft:#28c46d;
+    --red:#d83b3b;
+    --red-soft:#ff5a5a;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;min-height:100%;overflow-x:hidden}
+  body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  .app{max-width:760px;margin:0 auto;padding:18px 16px 36px;min-height:100vh;display:flex;flex-direction:column}
+  .brand{display:flex;flex-direction:column;align-items:center;text-align:center;padding:18px 6px 8px}
+  .brand img{width:170px;height:170px;border-radius:24px;display:block;box-shadow:0 0 0 1px var(--line),0 14px 36px rgba(212,175,55,0.18)}
+  .brand h1{font-size:26px;margin:18px 0 4px;color:var(--gold-soft);letter-spacing:.5px;line-height:1.15;font-weight:800}
+  .brand .sub{color:var(--gold);font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:1.4px;margin-bottom:10px}
+  .brand .tag{color:var(--muted);font-size:15px;line-height:1.45;max-width:520px;margin:0 auto}
+  .panel{background:linear-gradient(180deg,var(--panel) 0%,var(--panel-2) 100%);border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:16px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.02)}
+  .btn{display:flex;align-items:center;justify-content:center;width:100%;padding:18px 16px;border-radius:14px;font-size:17px;font-weight:700;border:1px solid var(--line-strong);background:linear-gradient(180deg,#1a1a1a 0%,#0a0a0a 100%);color:var(--gold-soft);cursor:pointer;letter-spacing:.4px;transition:transform .05s ease,background .2s ease,box-shadow .2s ease;min-height:56px}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{background:linear-gradient(180deg,#e8c44f 0%,#b58d25 100%);color:#0a0a0a;border-color:#f5e4b3;box-shadow:0 8px 20px rgba(212,175,55,0.28)}
+  .btn.green{background:linear-gradient(180deg,#1f9f57 0%,#127a3f 100%);color:#fff;border-color:#28c46d}
+  .btn.red{background:linear-gradient(180deg,#cf3535 0%,#8a1d1d 100%);color:#fff;border-color:#ff5a5a}
+  .btn.ghost{background:transparent;color:var(--gold);border-color:var(--line)}
+  .btn + .btn{margin-top:10px}
+  .row{display:flex;gap:10px}
+  .row .btn{flex:1}
+  .hidden{display:none !important}
+
+  .hud{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#0a0a0a;font-size:13px;color:var(--gold-soft);font-weight:700}
+  .pill .dot{width:8px;height:8px;border-radius:999px;background:var(--gold)}
+  .progress{height:8px;border-radius:999px;background:#0a0a0a;border:1px solid var(--line);overflow:hidden;margin-bottom:14px}
+  .progress > span{display:block;height:100%;background:linear-gradient(90deg,#b58d25,#f5e4b3);width:0%;transition:width .25s ease}
+  .badge{display:inline-block;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--line);color:var(--gold-soft);background:#0a0a0a;margin-bottom:12px}
+  .qcard{font-size:17px;line-height:1.5;color:var(--text);margin:6px 0 16px}
+  .choice{display:flex;align-items:center;gap:12px;width:100%;padding:14px 14px;border-radius:12px;border:1px solid var(--line);background:#0a0a0a;color:var(--text);text-align:left;font-size:15.5px;line-height:1.4;cursor:pointer;margin-bottom:10px;font-weight:600}
+  .choice .marker{width:26px;height:26px;border-radius:999px;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:12px;font-weight:800;flex:0 0 auto}
+  .choice.locked{cursor:default;opacity:.85}
+  .choice.correct{border-color:var(--green-soft);background:rgba(40,196,109,0.13)}
+  .choice.correct .marker{border-color:var(--green-soft);color:var(--green-soft)}
+  .choice.wrong{border-color:var(--red-soft);background:rgba(255,90,90,0.12)}
+  .choice.wrong .marker{border-color:var(--red-soft);color:var(--red-soft)}
+  .choice.reveal{border-color:var(--green-soft);background:rgba(40,196,109,0.08)}
+
+  .rg-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:6px 0 8px}
+  .rg-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:22px 12px;border-radius:14px;font-size:16px;font-weight:800;border:2px solid;cursor:pointer;min-height:110px}
+  .rg-btn .icon{font-size:28px;line-height:1}
+  .rg-green{border-color:var(--green-soft);background:linear-gradient(180deg,rgba(40,196,109,0.18),rgba(40,196,109,0.06));color:#cdeed7}
+  .rg-red{border-color:var(--red-soft);background:linear-gradient(180deg,rgba(216,59,59,0.18),rgba(216,59,59,0.06));color:#f7d2d2}
+  .rg-btn:active{transform:translateY(1px)}
+  .rg-btn.locked{cursor:default;opacity:.65}
+  .rg-btn.picked{box-shadow:0 0 0 3px rgba(212,175,55,0.35) inset}
+
+  .feedback{margin-top:14px;border-radius:14px;padding:14px;border:1px solid var(--line);background:#0a0a0a}
+  .feedback.good{border-color:var(--green-soft);background:rgba(40,196,109,0.08)}
+  .feedback.bad{border-color:var(--red-soft);background:rgba(255,90,90,0.07)}
+  .feedback h3{margin:0 0 6px;font-size:15px;letter-spacing:.5px;text-transform:uppercase}
+  .feedback.good h3{color:var(--green-soft)}
+  .feedback.bad h3{color:var(--red-soft)}
+  .feedback p{margin:6px 0 0;color:var(--text);font-size:14.5px;line-height:1.5}
+  .lesson{margin-top:10px;padding:12px;border-radius:12px;border:1px dashed var(--line);background:#070707}
+  .lesson strong{color:var(--gold-soft)}
+
+  .result-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 6px}
+  .stat{padding:14px;border-radius:12px;background:#0a0a0a;border:1px solid var(--line);text-align:center}
+  .stat .v{font-size:28px;color:var(--gold-soft);font-weight:800}
+  .stat .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+  .rating{margin:12px 0;padding:16px;border-radius:14px;border:1px solid var(--line-strong);background:linear-gradient(180deg,rgba(212,175,55,0.10),rgba(212,175,55,0.02));text-align:center}
+  .rating .title{color:var(--gold-soft);font-size:20px;font-weight:800;letter-spacing:.5px}
+  .rating .msg{color:var(--muted);font-size:14px;margin-top:6px;line-height:1.5}
+
+  .how ol{padding-left:18px;margin:10px 0}
+  .how li{margin:8px 0;color:var(--text);line-height:1.5;font-size:15px}
+  .how .key{color:var(--gold-soft);font-weight:700}
+
+  .disclaimer{margin-top:18px;padding:12px 14px;border:1px dashed var(--line);border-radius:12px;background:#070707;color:var(--muted);font-size:12.5px;line-height:1.5}
+  footer{margin-top:auto;padding-top:18px;text-align:center;color:var(--muted);font-size:12px}
+  footer .gold{color:var(--gold)}
+
+  @media (max-width:380px){
+    .brand img{width:140px;height:140px}
+    .brand h1{font-size:22px}
+    .qcard{font-size:16px}
+  }
+  @media (min-width:760px){
+    .brand img{width:200px;height:200px}
+    .brand h1{font-size:30px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <section id="screen-home">
+    <div class="brand">
+      <img src="assets/logo.png" alt="Red Flag or Green Light logo" />
+      <h1>Red Flag or Green Light&trade;</h1>
+      <div class="sub">The Investing Reality Game</div>
+      <p class="tag">Decide which money moves are real opportunities and which are expensive tricks.</p>
+    </div>
+    <div class="panel">
+      <button class="btn primary" id="btn-start">Start Game</button>
+      <button class="btn ghost" id="btn-how">How It Works</button>
+    </div>
+    <div class="disclaimer">
+      Educational awareness only. Not legal, financial, investment, tax, banking, brokerage, or professional advice. Investing involves risk, including possible loss of principal.
+    </div>
+    <footer>
+      <span class="gold">WGRALGO</span> &middot; The Wealth Gap Resolution Algorithm&trade; Inc. &middot; v1.0.0
+    </footer>
+  </section>
+
+  <section id="screen-how" class="hidden">
+    <div class="brand">
+      <h1>How It Works</h1>
+      <div class="sub">Two question formats</div>
+    </div>
+    <div class="panel how">
+      <ol>
+        <li><span class="key">Multiple Choice</span> &mdash; pick the answer that best matches sound investing principles.</li>
+        <li><span class="key">Opportunity or Trick</span> &mdash; decide if a money move is a real opportunity (green light) or a costly trick (red flag).</li>
+        <li>Each correct answer raises your <span class="key">score</span> and grows your <span class="key">streak</span>. A wrong answer resets the streak.</li>
+        <li>After every answer you get instant feedback and an <span class="key">investing lesson</span>.</li>
+        <li>Finish all questions to see your <span class="key">final rating</span> and replay to improve.</li>
+      </ol>
+      <div class="lesson">
+        <strong>Reminder:</strong> This app is for awareness and practice. It is not financial advice and does not recommend specific securities, brokers, or strategies.
+      </div>
+    </div>
+    <button class="btn ghost" id="btn-how-back" style="margin-top:14px">Back</button>
+  </section>
+
+  <section id="screen-game" class="hidden">
+    <div class="hud">
+      <span class="pill"><span class="dot"></span><span id="hud-score">Score 0</span></span>
+      <span class="pill"><span class="dot"></span><span id="hud-streak">Streak 0</span></span>
+      <span class="pill"><span class="dot"></span><span id="hud-progress">1 / 30</span></span>
+    </div>
+    <div class="progress"><span id="bar"></span></div>
+    <div class="panel">
+      <div class="badge" id="q-type">Multiple Choice</div>
+      <div class="qcard" id="q-text"></div>
+      <div id="q-choices"></div>
+      <div id="q-rg" class="rg-row hidden">
+        <button class="rg-btn rg-green" data-pick="green"><span class="icon">&#9989;</span>Green Light<small style="display:block;font-weight:600;color:#bfe9cc;margin-top:2px">Real Opportunity</small></button>
+        <button class="rg-btn rg-red" data-pick="red"><span class="icon">&#128681;</span>Red Flag<small style="display:block;font-weight:600;color:#f1bcbc;margin-top:2px">Trick / Warning</small></button>
+      </div>
+      <div id="feedback" class="feedback hidden">
+        <h3 id="fb-title"></h3>
+        <p id="fb-text"></p>
+        <div class="lesson"><strong>Lesson:</strong> <span id="fb-lesson"></span></div>
+      </div>
+      <button class="btn primary hidden" id="btn-next" style="margin-top:14px">Next Question</button>
+    </div>
+    <button class="btn ghost" id="btn-quit" style="margin-top:14px">Quit Game</button>
+  </section>
+
+  <section id="screen-result" class="hidden">
+    <div class="brand">
+      <h1>Final Results</h1>
+      <div class="sub">Investing Reality Check</div>
+    </div>
+    <div class="panel">
+      <div class="result-stats">
+        <div class="stat"><div class="v" id="r-score">0</div><div class="l">Final Score</div></div>
+        <div class="stat"><div class="v" id="r-best">0</div><div class="l">Best Streak</div></div>
+        <div class="stat"><div class="v" id="r-correct">0</div><div class="l">Correct</div></div>
+        <div class="stat"><div class="v" id="r-wrong">0</div><div class="l">Incorrect</div></div>
+      </div>
+      <div class="rating">
+        <div class="title" id="r-title">Rating</div>
+        <div class="msg" id="r-msg"></div>
+      </div>
+      <button class="btn primary" id="btn-again">Play Again</button>
+      <button class="btn ghost" id="btn-home">Back to Home</button>
+    </div>
+    <div class="disclaimer">
+      Reminder: educational awareness only. Investing involves risk. Consult a qualified professional for personal financial decisions.
+    </div>
+  </section>
+
+</div>
+
+<script>
+"use strict";
+
+const QUESTIONS = [
+  { type:"rg",
+    text:"A stranger online promises 5% guaranteed returns per week if you wire money into a private trading pool today.",
+    answer:"red",
+    feedback:"Guaranteed high weekly returns + pressure to act now + private pool with no oversight = classic investment fraud pattern.",
+    lesson:"No legitimate investment guarantees high returns. The combination of \"guaranteed,\" \"urgent,\" and \"unregistered\" is a major red flag."
+  },
+  { type:"mc",
+    text:"What does diversification actually do for an investor?",
+    choices:[
+      "Eliminates all risk from investing",
+      "Spreads risk across many assets so a single bad outcome hurts less",
+      "Guarantees higher returns than concentrated portfolios",
+      "Only matters for very wealthy investors"
+    ],
+    correct:1,
+    feedback:"Diversification spreads risk across different assets, sectors, or regions so one loss does not sink the whole portfolio.",
+    lesson:"Diversification can reduce risk but does not eliminate risk. Markets can still fall broadly."
+  },
+  { type:"rg",
+    text:"You build a 3 to 6 month emergency fund in a savings account before putting extra money into long-term investments.",
+    answer:"green",
+    feedback:"An emergency fund prevents you from having to sell investments at a bad time to cover surprise expenses.",
+    lesson:"Cash reserves are an investing tool too. They protect your long-term plan from short-term shocks."
+  },
+  { type:"mc",
+    text:"Which is the clearest sign of a likely scam?",
+    choices:[
+      "An investment with detailed fees and clear risk disclosures",
+      "Promised returns that are \"risk-free\" and far above market averages",
+      "A long history of audited results",
+      "Plain explanations of how the product works"
+    ],
+    correct:1,
+    feedback:"\"Risk-free\" and \"above market\" do not exist together. That combination is a hallmark of fraud.",
+    lesson:"Higher potential returns almost always come with higher risk. If risk seems missing, look harder."
+  },
+  { type:"rg",
+    text:"A coworker tells you a hot meme stock will \"go to the moon next week\" and you should put your rent money in tonight.",
+    answer:"red",
+    feedback:"Hype, time pressure, and risking essential money are all warning signs. Short-term hype trades are speculation, not investing.",
+    lesson:"Never invest money you cannot afford to lose. Hype-driven trades are gambling, not a financial plan."
+  },
+  { type:"mc",
+    text:"What is compound growth?",
+    choices:[
+      "When governments add interest to your taxes",
+      "When returns themselves start earning returns over time",
+      "When stock prices double automatically every year",
+      "When fees compound and shrink your account"
+    ],
+    correct:1,
+    feedback:"Compound growth is when your gains begin generating their own gains. Time is the most important ingredient.",
+    lesson:"Starting earlier with smaller amounts often beats starting later with larger amounts."
+  },
+  { type:"rg",
+    text:"You contribute steadily to a low-cost, broadly diversified index fund inside a tax-advantaged retirement account.",
+    answer:"green",
+    feedback:"Low fees, diversification, automation, and tax advantages are core building blocks of long-term investing.",
+    lesson:"Boring, consistent, low-cost investing usually beats exciting, expensive, complicated strategies over time."
+  },
+  { type:"mc",
+    text:"An advisor pushes a product with a 6% upfront sales charge and 2.5% yearly fees. What should you do first?",
+    choices:[
+      "Sign immediately so you do not miss out",
+      "Ask exactly how those fees affect long-term returns and compare alternatives",
+      "Assume high fees mean better performance",
+      "Borrow money to invest more before fees go up"
+    ],
+    correct:1,
+    feedback:"Fees compound against you. Understanding them and comparing alternatives is essential.",
+    lesson:"High fees do not guarantee better returns. Often the reverse is true over long periods."
+  },
+  { type:"rg",
+    text:"A new crypto token is \"exclusive\" for 24 hours, has anonymous founders, and the website demands you send funds to an unknown wallet.",
+    answer:"red",
+    feedback:"Anonymous team, urgency, exclusivity, and unverifiable destinations are classic crypto-fraud signals.",
+    lesson:"Crypto can be legitimate, but anonymity plus urgency plus unverifiable claims is a red flag in any asset class."
+  },
+  { type:"mc",
+    text:"What is the main risk of putting your entire retirement in one single company's stock?",
+    choices:[
+      "There is no real risk if it is your employer",
+      "Concentration risk – one company failing can wipe out your savings",
+      "Tax savings are reduced",
+      "It is impossible to do"
+    ],
+    correct:1,
+    feedback:"Concentration risk means a single bad event for one company can devastate your finances.",
+    lesson:"Spreading exposure across many companies, sectors, and asset types reduces the impact of any single failure."
+  },
+  { type:"rg",
+    text:"You set up automatic monthly contributions to your investment account so you invest consistently regardless of market mood.",
+    answer:"green",
+    feedback:"Automation removes emotion and timing guesswork from investing.",
+    lesson:"Steady contributions over time are more reliable than trying to time market tops and bottoms."
+  },
+  { type:"mc",
+    text:"During a sharp market drop, a long-term diversified investor usually benefits most from:",
+    choices:[
+      "Selling everything to avoid further losses",
+      "Sticking to their plan and continuing regular contributions",
+      "Borrowing on credit cards to buy more",
+      "Switching to a single hot stock"
+    ],
+    correct:1,
+    feedback:"Long-term plans assume drops will happen. Continuing contributions can buy assets at lower prices.",
+    lesson:"Volatility is normal. Reacting emotionally to short-term moves often hurts long-term results."
+  },
+  { type:"rg",
+    text:"A \"financial guru\" sells you a $4,997 course promising to make you rich in 30 days with their secret trading system.",
+    answer:"red",
+    feedback:"Expensive courses claiming guaranteed fast wealth are a classic pattern. The guru profits from selling the dream, not from the strategy.",
+    lesson:"Be skeptical of anyone selling certainty. Real investing skills are built slowly through study, practice, and honest mistakes."
+  },
+  { type:"mc",
+    text:"What is an index fund, in plain terms?",
+    choices:[
+      "A fund that only invests in one company",
+      "A fund that tries to match the performance of a broad market index at low cost",
+      "A government bond with guaranteed interest",
+      "A crypto token tied to a stock"
+    ],
+    correct:1,
+    feedback:"Index funds aim to track a broad market benchmark with low costs and broad diversification.",
+    lesson:"Low-cost index funds are one of the most accessible tools for long-term investors."
+  },
+  { type:"rg",
+    text:"You research a product's fees, understand its risks, check who regulates it, and confirm it fits your time horizon before investing.",
+    answer:"green",
+    feedback:"This is the core of responsible investing: understand what you are buying and why.",
+    lesson:"If you cannot explain an investment in simple terms, you may not be ready to buy it."
+  },
+  { type:"mc",
+    text:"\"Pump and dump\" schemes work by:",
+    choices:[
+      "Slowly building a company's earnings over decades",
+      "Hyping a low-volume asset to drive up the price, then selling on unsuspecting buyers",
+      "Issuing dividends to long-term shareholders",
+      "Audited public reporting required by regulators"
+    ],
+    correct:1,
+    feedback:"Pump and dump uses coordinated hype to inflate prices so insiders can sell to people who arrived late.",
+    lesson:"If a sudden \"opportunity\" is being aggressively promoted, ask who profits if you buy in now."
+  },
+  { type:"rg",
+    text:"A new \"investment club\" promises monthly payouts funded entirely by recruiting more members below you.",
+    answer:"red",
+    feedback:"Returns paid from new recruits rather than real investment activity is the definition of a Ponzi / pyramid structure.",
+    lesson:"If the math only works when more people join, the structure collapses when recruitment slows."
+  },
+  { type:"mc",
+    text:"Which statement is the most accurate?",
+    choices:[
+      "Long-term investing always guarantees you will make money",
+      "Past returns guarantee future returns",
+      "Even diversified long-term portfolios can lose value, especially over short periods",
+      "There is no such thing as risk in index funds"
+    ],
+    correct:2,
+    feedback:"Markets fluctuate. Even broad, diversified portfolios can lose value, particularly in shorter time windows.",
+    lesson:"Time horizon matters. Money you may need next year should not sit in volatile investments."
+  },
+  { type:"rg",
+    text:"An unsolicited caller claims they are with a government agency, says your account is at risk, and tells you to move funds into a \"safe\" wallet immediately.",
+    answer:"red",
+    feedback:"Real agencies do not cold-call to demand money transfers. Urgency + secrecy + unverifiable identity = scam.",
+    lesson:"When pressured, slow down. Hang up and contact the real organization through official channels you find yourself."
+  },
+  { type:"mc",
+    text:"What does \"risk tolerance\" mean for an investor?",
+    choices:[
+      "Your love of gambling",
+      "How much fluctuation in value you can emotionally and financially handle",
+      "Your maximum credit card limit",
+      "A bank's tolerance for your overdrafts"
+    ],
+    correct:1,
+    feedback:"Risk tolerance reflects both how much loss you can take financially and how you behave when markets swing.",
+    lesson:"A plan you can stick with during a downturn beats a riskier plan you will abandon at the worst time."
+  },
+  { type:"rg",
+    text:"You take time to compare two retirement account types, understand the tax differences, and pick the one that fits your situation.",
+    answer:"green",
+    feedback:"Understanding account types and tax treatment is a core investing skill.",
+    lesson:"Tax-advantaged accounts can meaningfully boost long-term outcomes when used correctly."
+  },
+  { type:"mc",
+    text:"A friend says \"This investment cannot lose. Put everything in.\" The healthiest response is:",
+    choices:[
+      "Mortgage your home and go all-in",
+      "Be skeptical, ask for written disclosures, and verify with independent sources",
+      "Tell others to join so the price rises faster",
+      "Believe them because they are your friend"
+    ],
+    correct:1,
+    feedback:"\"Cannot lose\" claims should always trigger skepticism, regardless of who is making them.",
+    lesson:"Friends and family can spread bad advice unintentionally. Verify before you risk real money."
+  },
+  { type:"rg",
+    text:"You only invest in things you genuinely understand and avoid products you cannot explain in plain language.",
+    answer:"green",
+    feedback:"Investing within your circle of understanding reduces the chance of being misled.",
+    lesson:"Complexity often hides risk and fees. Simple, transparent investments are usually safer to learn with."
+  },
+  { type:"mc",
+    text:"What is the biggest difference between investing and short-term speculation?",
+    choices:[
+      "Investing is illegal, speculation is legal",
+      "Investing focuses on long-term value and risk management; speculation bets on short-term price moves",
+      "Speculation always wins",
+      "There is no difference"
+    ],
+    correct:1,
+    feedback:"Investing typically targets long-term value with a managed risk plan; speculation bets on short-term price action.",
+    lesson:"Both exist, but mixing them up can destroy a long-term plan. Know which one you are doing."
+  },
+  { type:"rg",
+    text:"A \"too-good-to-miss\" deal requires you to keep it secret from your spouse, advisor, or family.",
+    answer:"red",
+    feedback:"Secrecy is a manipulation tactic used to isolate victims from people who might warn them.",
+    lesson:"Any opportunity that needs to be hidden from trusted people deserves extra scrutiny, not less."
+  },
+  { type:"mc",
+    text:"Why is it risky to chase last year's top-performing investment?",
+    choices:[
+      "It always keeps winning forever",
+      "Past performance does not guarantee future results, and \"hot\" funds often cool off",
+      "It cannot be bought legally",
+      "Regulators ban it after one year"
+    ],
+    correct:1,
+    feedback:"Yesterday's winners often become tomorrow's underperformers. Chasing past results can mean buying high.",
+    lesson:"Decide on a long-term strategy, then stick with it rather than jumping from trend to trend."
+  },
+  { type:"rg",
+    text:"You ignore a screaming headline about a market crash and continue your scheduled monthly contribution to your diversified plan.",
+    answer:"green",
+    feedback:"Long-term investors expect downturns and use plans to keep behavior consistent.",
+    lesson:"Headlines optimize for attention, not for your portfolio. Your plan should be louder than the news."
+  },
+  { type:"mc",
+    text:"What does \"unregistered offering\" usually signal?",
+    choices:[
+      "A specially safe investment",
+      "An investment not reviewed under standard regulations, often carrying higher fraud or risk",
+      "A guaranteed government-backed investment",
+      "A bank certificate of deposit"
+    ],
+    correct:1,
+    feedback:"Unregistered offerings skip standard regulatory review, which can mean less disclosure and higher fraud risk.",
+    lesson:"Registration is not a promise of safety, but its absence is a meaningful warning sign."
+  },
+  { type:"rg",
+    text:"You write down your goals, time horizon, and risk tolerance before choosing where to invest.",
+    answer:"green",
+    feedback:"Defining the goal first lets you choose tools that actually fit your situation.",
+    lesson:"Without a goal, every investment looks tempting. With a goal, only the relevant ones do."
+  },
+  { type:"mc",
+    text:"What is the single best mindset for an everyday investor?",
+    choices:[
+      "Try to get rich this month",
+      "Stay informed, patient, diversified, and skeptical of guaranteed shortcuts",
+      "Copy random social media tips",
+      "Trade on every news headline"
+    ],
+    correct:1,
+    feedback:"Slow, informed, diversified, skeptical investors tend to do better than fast, hype-driven ones over time.",
+    lesson:"You do not need to be brilliant. You need to avoid big mistakes and let time work for you."
+  }
+];
+
+let state = null;
+
+function newGame(){
+  state = {
+    idx: 0,
+    score: 0,
+    streak: 0,
+    bestStreak: 0,
+    correct: 0,
+    wrong: 0,
+    answered: false,
+    order: shuffle(QUESTIONS.map((_,i)=>i))
+  };
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function show(id){
+  ["screen-home","screen-how","screen-game","screen-result"].forEach(s=>{
+    document.getElementById(s).classList.toggle("hidden", s !== id);
+  });
+  window.scrollTo({top:0,behavior:"instant"});
+}
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[c]);
+}
+
+function renderQuestion(){
+  const total = state.order.length;
+  const q = QUESTIONS[state.order[state.idx]];
+  state.answered = false;
+
+  document.getElementById("hud-score").textContent = "Score " + state.score;
+  document.getElementById("hud-streak").textContent = "Streak " + state.streak;
+  document.getElementById("hud-progress").textContent = (state.idx+1) + " / " + total;
+  document.getElementById("bar").style.width = ((state.idx)/total*100) + "%";
+
+  const typeEl = document.getElementById("q-type");
+  typeEl.textContent = q.type === "mc" ? "Multiple Choice" : "Opportunity or Trick";
+
+  document.getElementById("q-text").textContent = q.text;
+
+  const choicesEl = document.getElementById("q-choices");
+  const rgEl = document.getElementById("q-rg");
+  const fb = document.getElementById("feedback");
+  fb.classList.add("hidden");
+  document.getElementById("btn-next").classList.add("hidden");
+
+  choicesEl.innerHTML = "";
+
+  if(q.type === "mc"){
+    rgEl.classList.add("hidden");
+    choicesEl.classList.remove("hidden");
+    const letters = ["A","B","C","D","E"];
+    q.choices.forEach((c,i)=>{
+      const b = document.createElement("button");
+      b.className = "choice";
+      b.innerHTML = '<span class="marker">'+letters[i]+'</span><span>'+escapeHtml(c)+'</span>';
+      b.addEventListener("click", ()=>answerMC(i,b));
+      choicesEl.appendChild(b);
+    });
+  } else {
+    choicesEl.classList.add("hidden");
+    rgEl.classList.remove("hidden");
+    rgEl.querySelectorAll(".rg-btn").forEach(b=>{
+      b.classList.remove("locked","picked");
+      b.onclick = ()=>answerRG(b.dataset.pick, b);
+    });
+  }
+}
+
+function answerMC(picked, btn){
+  if(state.answered) return;
+  state.answered = true;
+  const q = QUESTIONS[state.order[state.idx]];
+  const isCorrect = picked === q.correct;
+  scoreAnswer(isCorrect);
+
+  const choices = document.querySelectorAll("#q-choices .choice");
+  choices.forEach((el,i)=>{
+    el.classList.add("locked");
+    el.onclick = null;
+    if(i === q.correct) el.classList.add("reveal");
+  });
+  if(isCorrect){
+    btn.classList.remove("reveal"); btn.classList.add("correct");
+  } else {
+    btn.classList.add("wrong");
+    choices[q.correct].classList.remove("reveal");
+    choices[q.correct].classList.add("correct");
+  }
+  showFeedback(isCorrect, q);
+}
+
+function answerRG(picked, btn){
+  if(state.answered) return;
+  state.answered = true;
+  const q = QUESTIONS[state.order[state.idx]];
+  const isCorrect = picked === q.answer;
+  scoreAnswer(isCorrect);
+
+  document.querySelectorAll("#q-rg .rg-btn").forEach(b=>{
+    b.classList.add("locked"); b.onclick = null;
+  });
+  btn.classList.add("picked");
+  showFeedback(isCorrect, q);
+}
+
+function scoreAnswer(isCorrect){
+  if(isCorrect){
+    state.correct++;
+    state.streak++;
+    if(state.streak > state.bestStreak) state.bestStreak = state.streak;
+    state.score += 10 + Math.min(state.streak, 5) * 2;
+  } else {
+    state.wrong++;
+    state.streak = 0;
+  }
+  document.getElementById("hud-score").textContent = "Score " + state.score;
+  document.getElementById("hud-streak").textContent = "Streak " + state.streak;
+}
+
+function showFeedback(isCorrect, q){
+  const fb = document.getElementById("feedback");
+  fb.classList.remove("hidden","good","bad");
+  fb.classList.add(isCorrect ? "good" : "bad");
+  document.getElementById("fb-title").textContent = isCorrect ? "Correct" : "Not quite";
+  document.getElementById("fb-text").textContent = q.feedback;
+  document.getElementById("fb-lesson").textContent = q.lesson;
+  document.getElementById("btn-next").classList.remove("hidden");
+}
+
+function nextQuestion(){
+  state.idx++;
+  if(state.idx >= state.order.length){
+    finishGame();
+  } else {
+    renderQuestion();
+  }
+}
+
+function finishGame(){
+  const total = state.order.length;
+  const pct = Math.round((state.correct/total)*100);
+  document.getElementById("r-score").textContent = state.score;
+  document.getElementById("r-best").textContent = state.bestStreak;
+  document.getElementById("r-correct").textContent = state.correct;
+  document.getElementById("r-wrong").textContent = state.wrong;
+
+  let title, msg;
+  if(pct >= 90){ title="Market Reality Master"; msg="You spot red flags fast and recognize sound investing principles. Keep learning and stay humble - markets surprise everyone."; }
+  else if(pct >= 75){ title="Sharp Investor"; msg="Strong financial instincts. Keep refining your understanding of fees, risk, and time horizon."; }
+  else if(pct >= 60){ title="Red Flag Spotter"; msg="You catch many warning signs. Deepen your knowledge of long-term investing fundamentals."; }
+  else if(pct >= 40){ title="Needs More Research"; msg="You are on the path. Slow down, study core ideas, and verify before acting on tips."; }
+  else { title="Too Easy to Hustle - Replay the Game"; msg="Hype, urgency, and \"guaranteed\" returns are big warning signs. Replay and rebuild your skepticism muscle."; }
+  document.getElementById("r-title").textContent = title;
+  document.getElementById("r-msg").textContent = msg;
+  show("screen-result");
+}
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  document.getElementById("btn-start").addEventListener("click", ()=>{
+    newGame();
+    renderQuestion();
+    show("screen-game");
+  });
+  document.getElementById("btn-how").addEventListener("click", ()=>show("screen-how"));
+  document.getElementById("btn-how-back").addEventListener("click", ()=>show("screen-home"));
+  document.getElementById("btn-next").addEventListener("click", nextQuestion);
+  document.getElementById("btn-quit").addEventListener("click", ()=>show("screen-home"));
+  document.getElementById("btn-again").addEventListener("click", ()=>{
+    newGame(); renderQuestion(); show("screen-game");
+  });
+  document.getElementById("btn-home").addEventListener("click", ()=>show("screen-home"));
+});
+</script>
+</body>
+</html>
