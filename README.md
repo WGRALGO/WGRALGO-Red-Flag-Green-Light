@@ -4,7 +4,8 @@ Red Flag or Green Light: The Investing Reality Game is a free educational Androi
 
 The app is fully offline, contains no ads, no analytics, no trackers, and asks for no permissions.
 
-- **Version:** 1.1.0
+- **Version:** 2.0.0
+- **Devices:** phones and tablets, portrait and landscape
 - **Package:** `org.wgralgo.redflaggreenlightinvesting`
 - **License:** GPL-3.0-only
 
@@ -43,14 +44,14 @@ The app is fully offline, contains no ads, no analytics, no trackers, and asks f
 
 ## How to install / sideload the APK
 
-1. Download `RedFlagGreenLight-v1.1.0.apk` from the [GitHub Releases](../../releases) page.
+1. Download `WGRALGO-RedFlagGreenLight-v2.0.0.apk` from the [GitHub Releases](../../releases) page.
 2. On your Android device, allow installs from your browser or file manager (Settings → Apps → Special access → Install unknown apps).
 3. Open the downloaded APK and tap **Install**.
 4. Optional integrity check (Linux/macOS):
    ```bash
-   sha256sum RedFlagGreenLight-v1.1.0.apk
+   sha256sum WGRALGO-RedFlagGreenLight-v2.0.0.apk
    ```
-   Compare the output with `RedFlagGreenLight-v1.1.0.apk.sha256` from the same release.
+   Compare the output with `WGRALGO-RedFlagGreenLight-v2.0.0.apk.sha256` from the same release.
 
 > **Upgrading from v1.0.0?** Version 1.1.0 is signed with a new key, so it
 > can't install over the old app. Uninstall v1.0.0 first, then install v1.1.0.
@@ -62,7 +63,7 @@ The app is fully offline, contains no ads, no analytics, no trackers, and asks f
 - SHA-256: `C4:1E:C7:8A:C1:08:7C:83:88:BE:1D:C3:24:A4:C3:91:EC:97:39:08:01:30:92:86:2D:18:B2:B3:A8:46:EB:32`
 
 ```bash
-apksigner verify --print-certs RedFlagGreenLight-v1.1.0.apk
+apksigner verify --print-certs WGRALGO-RedFlagGreenLight-v2.0.0.apk
 ```
 
 ## How to build from source
