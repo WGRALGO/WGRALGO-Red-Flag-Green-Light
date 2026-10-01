@@ -2,7 +2,7 @@
 
 **App:** WGRALGO Red Flag or Green Light: The Investing Reality Game
 **Publisher:** WGRALGO / The Wealth Gap Resolution Algorithm™ Inc.
-**Version:** 1.1.0
+**Version:** 2.0.0
 
 ## What the app does
 
